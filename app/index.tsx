@@ -1,12 +1,48 @@
 
 import CustomButton from "@/components/custom-button";
 import { images } from "@/constants";
-import { router } from "expo-router";
+import { getCurrentUser } from "@/lib/appwrite";
+import { useGlobalStore } from "@/store/useGlobalStore";
+import { UserProps } from "@/types/user";
+import { Redirect, router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { View, Image, ScrollView, Text } from "react-native";
+import { useEffect } from "react";
+import { View, Image, ScrollView, Text, ActivityIndicator, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function App() {
+  
+  const { isLoading, isLoggedIn, setUser, setIsLoading } = useGlobalStore()
+
+  // useEffect(() => {
+  //   setIsLoading(true)
+  //   const fetchUsers = async () => {
+  //     try {
+  //       const user = await getCurrentUser()
+  //       if (user) {
+  //         setUser(user as UserProps)
+  //         setIsLoading(false)
+  //       } 
+  //     } catch (error) {
+  //       console.log('Error fetching users')
+  //     } finally {
+  //       setIsLoading(false)
+  //     }
+  //   }
+
+  //   fetchUsers()
+  // }, [])
+
+  // if (isLoading) {
+  //   return (
+  //     <SafeAreaView className="bg-primary h-full justify-center items-center">
+  //       <ActivityIndicator size="large" color="#ffffff" />
+  //     </SafeAreaView>
+  //   );
+  // }
+
+  if(!isLoading && isLoggedIn) return <Redirect href="/home" />
+
   return (
     <SafeAreaView className="bg-primary h-full">
       <ScrollView contentContainerStyle={{ height: '100%' }}>

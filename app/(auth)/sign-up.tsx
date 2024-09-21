@@ -1,10 +1,13 @@
-import { View, Text, ScrollView, Image } from 'react-native'
+import { View, Text, ScrollView, Image, Alert } from 'react-native'
 import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { images } from '@/constants'
 import FormField from '@/components/form-field'
 import CustomButton from '@/components/custom-button'
-import { Link } from 'expo-router'
+import { Link, router } from 'expo-router'
+import { createUser, getCurrentUser } from '@/lib/appwrite'
+import { useGlobalStore } from '@/store/useGlobalStore'
+import { UserProps } from '@/types/user'
 
 interface FormDataProps {
   username: string;
@@ -13,6 +16,8 @@ interface FormDataProps {
 }
 
 const SignUp = () => {
+
+  const { setUser } = useGlobalStore()
 
   const [formData, setFormData] = useState<FormDataProps>({
     username: '',
@@ -29,8 +34,25 @@ const SignUp = () => {
     })
   }
 
-  const handleSubmit = () => {
-
+  const handleSubmit = async () => {
+    if (!formData.username || !formData.email || !formData.password) {
+      Alert.alert('Error', 'Please fill in all the fields')
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      const result = await createUser(formData.email, formData.password, formData.username);
+      if (result) {
+        const user = await getCurrentUser()
+        setUser(user as UserProps)
+        router.replace('/home')
+      }
+    } catch (error) {
+      Alert.alert('Error', 'An unexpected error occurred. Please try again later.')
+      console.log(error)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -43,7 +65,7 @@ const SignUp = () => {
             className='w-[115px] h-[35px]'
           />
           <Text className='text-2xl text-white mt-10 font-psemibold'>
-            Log in to Aora
+            Sign up to Aora
           </Text>
           <FormField 
             title="Username"
@@ -65,7 +87,7 @@ const SignUp = () => {
             otherStyles="mt-7"
           />
           <CustomButton
-            title="Sign In"
+            title="Sign Up"
             handlePress={handleSubmit}
             containerStyles='mt-7'
             isLoading={isSubmitting}

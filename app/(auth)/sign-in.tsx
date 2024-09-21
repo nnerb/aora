@@ -1,10 +1,14 @@
-import { View, Text, ScrollView, Image } from 'react-native'
+import { View, Text, ScrollView, Image, Alert } from 'react-native'
 import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { images } from '@/constants'
 import FormField from '@/components/form-field'
 import CustomButton from '@/components/custom-button'
-import { Link } from 'expo-router'
+import { Link, router } from 'expo-router'
+import { createUser, getCurrentUser, signIn } from '@/lib/appwrite'
+import { useGlobalContext } from '@/context/global-provider'
+import { useGlobalStore } from '@/store/useGlobalStore'
+import { UserProps } from '@/types/user'
 
 interface FormDataProps {
   email: string;
@@ -13,10 +17,13 @@ interface FormDataProps {
 
 const SignIn = () => {
 
+  const { setUser, setIsLoggedIn } = useGlobalStore()
+
   const [formData, setFormData] = useState<FormDataProps>({
     email: '',
     password: ''
   })
+
 
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -27,8 +34,31 @@ const SignIn = () => {
     })
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (!formData.email || !formData.password) {
+      Alert.alert('Error', 'Please fill in all the fields')
+      return
+    }
+    setIsSubmitting(true)
+    try {    
+      // const result = await signIn(formData.email, formData.password);
+      // setUser(result)
+      // setIsLoggedIn(true)
+      // router.replace('/home')
 
+      const result = await signIn(formData.email, formData.password)
+      if (result) {
+        const user = await getCurrentUser() // Fetch the full user data
+        setUser(user as UserProps) // Ensure user is cast to UserProps
+        setIsLoggedIn(true)
+        router.replace('/home')
+      }
+    } catch (error) {
+      Alert.alert('Error', 'An unexpected error occurred. Please try again later.')
+      console.log(error)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
