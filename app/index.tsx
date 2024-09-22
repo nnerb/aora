@@ -1,47 +1,35 @@
 
 import CustomButton from "@/components/custom-button";
 import { images } from "@/constants";
-import { getCurrentUser } from "@/lib/appwrite";
 import { useGlobalStore } from "@/store/useGlobalStore";
-import { UserProps } from "@/types/user";
 import { Redirect, router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
-import { View, Image, ScrollView, Text, ActivityIndicator, Alert } from "react-native";
+import { View, Image, ScrollView, Text, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function App() {
   
-  const { isLoading, isLoggedIn, setUser, setIsLoading } = useGlobalStore()
+  const { 
+    isLoading, 
+    isLoggedIn, 
+    user,
+    fetchCurrentUser
+  } = useGlobalStore()
 
-  // useEffect(() => {
-  //   setIsLoading(true)
-  //   const fetchUsers = async () => {
-  //     try {
-  //       const user = await getCurrentUser()
-  //       if (user) {
-  //         setUser(user as UserProps)
-  //         setIsLoading(false)
-  //       } 
-  //     } catch (error) {
-  //       console.log('Error fetching users')
-  //     } finally {
-  //       setIsLoading(false)
-  //     }
-  //   }
+  useEffect(() => {
+    fetchCurrentUser()
+  }, [])
 
-  //   fetchUsers()
-  // }, [])
+  if (isLoading) {
+    return (
+      <SafeAreaView className="bg-primary h-full justify-center items-center">
+        <ActivityIndicator size="large" color="#ffffff" />
+      </SafeAreaView>
+    );
+  }
 
-  // if (isLoading) {
-  //   return (
-  //     <SafeAreaView className="bg-primary h-full justify-center items-center">
-  //       <ActivityIndicator size="large" color="#ffffff" />
-  //     </SafeAreaView>
-  //   );
-  // }
-
-  if(!isLoading && isLoggedIn) return <Redirect href="/home" />
+  if(user && isLoggedIn) return <Redirect href="/home" />
 
   return (
     <SafeAreaView className="bg-primary h-full">

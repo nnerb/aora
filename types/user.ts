@@ -1,4 +1,5 @@
-export interface UserProps {
+import { Models } from "react-native-appwrite";
+export interface UserProps extends Models.Document {
   $collectionId: string;
   $createdAt: string;
   $databaseId: string;
